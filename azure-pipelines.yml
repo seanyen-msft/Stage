@@ -1,0 +1,20 @@
+variables:
+  STAGE_INSTALL_PREFIX: 'c:\opt\rosdeps\x64'
+
+jobs:
+- job: Build
+  timeoutInMinutes: 240
+  pool:
+    vmImage: 'vs2017-win2016'
+  steps:
+  - script: |
+      choco sources add -n=roswin -s https://roswin.azurewebsites.net/api/v2/ --priority 1
+      choco upgrade libjpeg-turbo libpng -y
+      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+      set PATH=%PATH:C:\tools\mingw64\bin;=%
+      set PATH=%PATH:C:\Program Files\Git\bin;=%
+      set PATH=%PATH:C:\Program Files\Git\usr\bin;=%
+      set PATH=%PATH:C:\Program Files\Git\mingw64\bin;=%
+      mkdir build & cd build
+      cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=%STAGE_INSTALL_PREFIX% -DCMAKE_INSTALL_PREFIX=%STAGE_INSTALL_PREFIX% -G "Ninja" ..
+      ninja install
